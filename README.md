@@ -12,3 +12,13 @@ Outline Goal:
 * Receive data at set intervals
 * Ramp up to many temperature sensors connected in ... ? (P/S)
 * Transmit the data into a 1D array of all 100 data points to be collected by another program
+
+
+Hardware Setup for testing one DS 18B20:
+* NOTE: All pins connected to DS 18B20 are relative to flat side towards user
+
+* 5V power to right pin of DS 18B20
+* GND to left pin of DS 18B20
+* P1.01 to middle pin as receive (Rx)
+* P1.02 to middle pin as transmit (Tx)
+* 4.7 kO resistor (YVO_G) in series to VDD (3.3V)
