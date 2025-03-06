@@ -11,4 +11,4 @@ Outline Goal:
 * Connect to Temperature sensor and receive room temperature data
 * Receive data at set intervals
 * Ramp up to many temperature sensors connected in ... ? (P/S)
-* Transmit the data into a 1D array of all 100 data points to be collected by another program\
+* Transmit the data into a 1D array of all 100 data points to be collected by another program
