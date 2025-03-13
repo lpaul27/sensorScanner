@@ -8,7 +8,7 @@ This file contains the ID access of all the temperature sensors
 6, 28f861f90c000048
 7, 28bd1cf90c000057
 8,
-9,
+9, 283f7ef90c000041
 10, 28fd6cf90c00004f
 11, 28b748fa0c00009a
 12, 286e1af90c000056
@@ -25,7 +25,7 @@ This file contains the ID access of all the temperature sensors
 23, 284d7df90c0000f9
 24, 28482cf90c00004a
 25,
-26, 
+26, 285930f90c00007b
 27, 280e38f90c0000ee
 28, 283333f90c000039
 29, 288e48fa0c0000e1
@@ -39,19 +39,19 @@ This file contains the ID access of all the temperature sensors
 37,
 38,
 39,
-40,
-41,
-42,
+40, 28316bfa0c000074
+41, 28e118f90c00001b
+42, 28699cf90c000084
 43,
 44,
 45,
-46,
-47,
-48,
+46, 288ed2f90c000063
+47, 286af3f90c0000a3
+48, 28e627f90c000075
 49,
-50,
+50, 281568fa0c000050
 51,
-52,
+52, 28ff64f90c00001f
 53,
 54,
 55,
@@ -59,14 +59,14 @@ This file contains the ID access of all the temperature sensors
 57,
 58,
 59,
-60,
-61,
+60, 288873fa0c0000a7
+61, 28cc17f90c000088
 62,
-63,
+63, 28bd49f90c000010
 64,
-65,
-66,
-67,
+65,f
+66, 28cbddf90c000092
+67, 285095f90c00000c
 68,
 69,
 70,
