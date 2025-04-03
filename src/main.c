@@ -38,7 +38,7 @@ int main(void){
 
         while(true){
                 res = sensor_sample_fetch(dev);
-                k_sleep(K_MSEC(2000));
+                k_sleep(K_MSEC(20000));
         }
         // while(true){
         //         struct sensor_value temp;

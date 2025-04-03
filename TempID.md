@@ -1,13 +1,13 @@
 This file contains the ID access of all the temperature sensors
 
-Sensor 1:
+Sensor 1: 2810d9f90c0000b1
 Sensor 2: 28d676f90c0000c0
-Sensor 3:
+Sensor 3: 28352cf90c000098
 Sensor 4:
-Sensor 5:
+Sensor 5: 284b45f90c0000f1
 Sensor 6: 28f861f90c000048
 Sensor 7:
-Sensor 8:
+Sensor 8: 288f03f90c0000c7
 Sensor 9:
 Sensor 10:
 Sensor 11:
@@ -17,14 +17,14 @@ Sensor 14:
 Sensor 15:
 Sensor 16:
 Sensor 17:
-Sensor 18:
+Sensor 18: 28d98af90c000063
 Sensor 19:
 Sensor 20:
 Sensor 21:
 Sensor 22:
 Sensor 23:
 Sensor 24:
-Sensor 25:
+Sensor 25: 28bb64fa0c00003e
 Sensor 26:
 Sensor 27:
 Sensor 28:
