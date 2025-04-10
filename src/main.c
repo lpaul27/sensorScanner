@@ -176,6 +176,58 @@ void ds18b20_request_temperatures(const struct device *w1){
 
 
 // after device has been written to, function to read what was found
-int ds18b20_get_temp(const stuct)
+int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
+        uint8_t scratchpad[9];
+
+        // read scratchpad command
+        uint8_t cmd[1] = {0xBE};
+
+        // declaration of variables
+
+        uint16_t raw_temp;
+        struct w1_rom rom_struct;
+        w1_uint64t_to_rom(rom, &rom_struct);
+        int result;
+        struct w1_slave_config ds18b20_config;
+        ds18b20_config.overdrive = 0;
+        ds18b20_config.rom = rom_struct;
+
+        // write read to the device
+        result = w1_write_read(w1, &ds18b20_config, cmd, 1, scratchpad, sizeof(scratchpad));
+
+        // error reading from write-read
+        if(result < 0){
+                LOG_ERR("Error reading scratchpad: %d", result);
+                return result;
+        }
+
+        // received 8 bit crc
+        result = w1_crc8(scratchpad, sizeof(scratchpad) - 1);
+
+        // if we did not get the intended crc
+        if(result != scratchpad[8]){
+                LOG_ERR("CRC error: %d", result);
+                return -EIO;
+        }
+
+        if(result < 0){
+                return result;
+        }
+        
+        if(result < 0){
+                return result;
+        }
+        if(scratchpad[1] >= 8) {
+                // The negative temperature stored in twos compliment
+                raw_temp = (~scratchpad[1]) << 8 | (~scratchpad[0]);
+                raw_temp = -raw_temp;
+        }
+        raw_temp = (scratchpad[1] << 8) | scratchpad[0];
+        *temp = 0.0625 * raw_temp; // Final conversion to celsius
+
+
+
+        return 0;
+}
 
 
