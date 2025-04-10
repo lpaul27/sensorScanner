@@ -31,6 +31,9 @@ uint32_t known_ids[KNOWN_SENSORS] = {
 // boolean to represent whether or not the sensor is working
 bool present[KNOWN_SENSORS] = {false, false};
 
+// Array to store the temperature data
+float temp_readings[KNOWN_SENSORS];
+
 LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_DBG);
 
 static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
@@ -77,18 +80,23 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
         while(true){
                 ds18b20_request_temperatures(w1);
                 for(int i = 0; i < KNOWN_SENSORS; i++){
+                        temp = -666;
                         if(present[i]){
                                 int result = ds18b20_get_temp(w1, known_roms[i], &temp);
                                 // if there was an error attaining the temperature or talking to sensor
                                 if(result < 0){
                                         LOG_ERR("Error reading temperature from sensor %d: %d", known_ids[i], result);
-                                        continue;
                                 }
-                                LOG_INF("Sensor ID %d: %.2f C", known_ids[i], temp);
+                                // LOG_INF("Sensor ID %d: %.2f C", known_ids[i], temp);
                         }
+                        printk("%.2f\t", temp);
                 }
                 // sleep for 5 seconds before next reading
-                k_msleep(5000);
+
+                //print data from the for loop in one line string for the python code to read
+                printk("\n");
+                
+                k_msleep(2000);
         }
 
 // comment block represents the code used to attain a temperature
@@ -138,15 +146,15 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
 
 // Function to check if the temperature sensors are present
 void w1_search_callback(struct w1_rom rom, void *user_data){
-        uint64_t rom_as_int = w1_rom_to_uint64t(&rom);
+        uint64_t rom_as_int = w1_rom_to_uint64(&rom);
         for(int i = 0; i < KNOWN_SENSORS; i++){
                 if(rom_as_int == known_roms[i]){
-                        LOG_INF("Found sensor ID %d with ROM 0x%01611x", known_ids[i], rom_as_int);
+                        LOG_INF("Found sensor ID %d with ROM 0x%016llx", known_ids[i], rom_as_int);
                         present[i] = true;
                         return;
                 }
         }
-        LOG_INF("Found new sensor with ROM: 0x%01611x", rom_as_int);
+        LOG_INF("Found new sensor with ROM: 0x%016llx", rom_as_int);
 }
 
 // function to talk to temperature sensors
@@ -177,6 +185,7 @@ void ds18b20_request_temperatures(const struct device *w1){
 
 // after device has been written to, function to read what was found
 int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
+        // variable to store the data of the temperature sensor and be manipulated
         uint8_t scratchpad[9];
 
         // read scratchpad command
@@ -186,13 +195,13 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
 
         uint16_t raw_temp;
         struct w1_rom rom_struct;
-        w1_uint64t_to_rom(rom, &rom_struct);
+        w1_uint64_to_rom(rom, &rom_struct);
         int result;
         struct w1_slave_config ds18b20_config;
         ds18b20_config.overdrive = 0;
         ds18b20_config.rom = rom_struct;
 
-        // write read to the device
+        // write read to the device to attain the 16 bit data from the sensor
         result = w1_write_read(w1, &ds18b20_config, cmd, 1, scratchpad, sizeof(scratchpad));
 
         // error reading from write-read
@@ -201,10 +210,11 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
                 return result;
         }
 
-        // received 8 bit crc
+        // compacting first 7 bits of scratchpad to test if what was received makes sense
         result = w1_crc8(scratchpad, sizeof(scratchpad) - 1);
 
         // if we did not get the intended crc
+        // Compares the compacted first 7 bits into the but 8 of scratchpad, should be the same if it works
         if(result != scratchpad[8]){
                 LOG_ERR("CRC error: %d", result);
                 return -EIO;
@@ -219,10 +229,18 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
         }
         if(scratchpad[1] >= 8) {
                 // The negative temperature stored in twos compliment
+                // Scratchpad[1] represents bits 9-16
+                // if scratchpad's bits sum to be greater than 7, we know it is negative
+                // if this is true, we need to handle appropriately
                 raw_temp = (~scratchpad[1]) << 8 | (~scratchpad[0]);
+                // ~ represents bitwise not and we must flip all bits of scratchpad (0 --> 1 & 1 --> 0)
                 raw_temp = -raw_temp;
+                // we have now made it positive so we needed to switch it back to negative
+
+                // The negative case has now been succesfully handled
         }
         raw_temp = (scratchpad[1] << 8) | scratchpad[0];
+        // if the negative case was not necessary, we simply need to shift the bits later and or with the early bits
         *temp = 0.0625 * raw_temp; // Final conversion to celsius
 
 
