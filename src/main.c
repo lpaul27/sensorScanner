@@ -230,7 +230,7 @@ bool present[KNOWN_SENSORS] = {false, false};
 // Array to store the temperature data
 float temp_readings[KNOWN_SENSORS];
 
-LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_INF);
 
 static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
 
@@ -269,7 +269,7 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                 return -1;
         }
 
-        LOG_INF("Searching for 1-wire sensors");
+        LOG_DBG("Searching for 1-wire sensors");
         int num_sensors = w1_search_rom(w1, w1_search_callback, NULL);
 
         // infinite loop for attaining temperature data
@@ -345,12 +345,12 @@ void w1_search_callback(struct w1_rom rom, void *user_data){
         uint64_t rom_as_int = w1_rom_to_uint64(&rom);
         for(int i = 0; i < KNOWN_SENSORS; i++){
                 if(rom_as_int == known_roms[i]){
-                        LOG_INF("Found sensor ID %d with ROM 0x%016llx", known_ids[i], rom_as_int);
+                        LOG_DBG("Found sensor ID %d with ROM 0x%016llx", known_ids[i], rom_as_int);
                         present[i] = true;
                         return;
                 }
         }
-        LOG_INF("Found new sensor with ROM: 0x%016llx", rom_as_int);
+        LOG_DBG("Found new sensor with ROM: 0x%016llx", rom_as_int);
 }
 
 // function to talk to temperature sensors

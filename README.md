@@ -21,4 +21,4 @@ Hardware Setup for testing one DS 18B20:
 * GND to left pin of DS 18B20
 * P1.01 to middle pin as receive (Rx)
 * P1.02 to middle pin as transmit (Tx)
-* 4.7 kO resistor (YVO_Go) in series with Rx and Tx to VDD (3.3V)
+* 4.7 kO resistor (YVRGo) in series with Rx and Tx to VDD (3.3V)
