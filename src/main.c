@@ -38,7 +38,7 @@ uint64_t known_roms[KNOWN_SENSORS] = {
         0x289b27fa0c00002f, //18
         0x283d81f90c0000e6, //19
         0x28d114fa0c00005f, //20
-        0x28103af90c000025, //21
+        0x28103af90c000025, //21 MISSING
         0x288c83f90c000055, //22
         0x284d7df90c0000f9, //23
         0x28482cf90c00004a, //24
@@ -285,6 +285,7 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                                 }
                                 // LOG_INF("Sensor ID %d: %.2f C", known_ids[i], temp);
                         }
+                        k_msleep(10);
                         printk("%.2f\t", temp);
                 }
                 // sleep for 5 seconds before next reading
@@ -292,7 +293,7 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                 //print data from the for loop in one line string for the python code to read
                 printk("\n");
                 
-                k_msleep(2000);
+                k_msleep(180);
         }
 
 // comment block represents the code used to attain a temperature

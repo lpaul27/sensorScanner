@@ -49,10 +49,12 @@
             status = "okay";
             
         };
+
     };
 
-    &uart0 {
-        current-speed = <28800>;
-    };
+};
+
+&uart0 {
+    current-speed = <19200>;
 };
 
