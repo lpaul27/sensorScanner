@@ -2,8 +2,8 @@
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/sensor/w1_sensor.h>
+#include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
-
 
 void w1_search_callback(struct w1_rom rom, void *user_data);
 void ds18b20_request_temperatures(const struct device *w1);
@@ -11,6 +11,9 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp);
 
 #define DS18B20_CMD_CONVERT_TEMP 0x44
 #define KNOWN_SENSORS 100
+
+// Interval of data collection
+K_TIMER_DEFINE(collection_interval, NULL, NULL);
 
 // ID's of the temperature sensors
 uint64_t known_roms[KNOWN_SENSORS] = {
@@ -278,27 +281,32 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
         // causes error unused-variable, works fine.
         int num_sensors = w1_search_rom(w1, w1_search_callback, NULL);
 
+        // Timer for data collection interval of 2 seconds
+        k_timer_start(&collection_interval, K_MSEC(2000), K_MSEC(2000));
+
         // infinite loop for attaining temperature data
         while(true){
-                ds18b20_request_temperatures(w1);
-                for(int i = 0; i < KNOWN_SENSORS; i++){
-                        temp = -666;
-                        if(present[i]){
-                                int result = ds18b20_get_temp(w1, known_roms[i], &temp);
-                                // if there was an error attaining the temperature or talking to sensor
-                                if(result < 0){
-                                        LOG_ERR("Error reading temperature from sensor %d: %d", known_ids[i], result);
-                                }
-                        }
-                        k_msleep(10);
-                        printk("%.2f\t", temp);
-                }
-                // sleep for 5 seconds before next reading
-
-                //print data from the for loop in one line string for the python code to read
-                printk("\n");
                 
-                k_msleep(180);
+                if(k_timer_status_get(&collection_interval) >0){
+                        ds18b20_request_temperatures(w1);
+                        for(int i = 0; i < KNOWN_SENSORS; i++){
+                                temp = -666; // Used to indicate no temp reading
+                                if(present[i]){
+                                        int result = ds18b20_get_temp(w1, known_roms[i], &temp);
+                                        // if there was an error attaining the temperature or talking to sensor
+                                        if(result < 0){
+                                                LOG_ERR("Error reading temperature from sensor %d: %d", known_ids[i], result);
+                                        }
+                                }
+                                k_msleep(9);
+                                printk("%.2f\t", temp);
+                        }
+
+                        //print data from the for loop in one line string for the python code to read
+                        printk("\n");
+                        LOG_DBG("end sequence");
+                }
+                
         }
 
 // comment block represents the code used to attain a temperature
