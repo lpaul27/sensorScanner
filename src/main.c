@@ -1,12 +1,9 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
-#include <zephyr/drivers/sensor.h>
 #include <zephyr/drivers/sensor/w1_sensor.h>
 #include <zephyr/logging/log.h>
 
-// struct device *tempSensors[1];
-// uint64_t sensorIDs [1] = {0x280305f90c0000cc};
 
 void w1_search_callback(struct w1_rom rom, void *user_data);
 void ds18b20_request_temperatures(const struct device *w1);
@@ -224,6 +221,7 @@ uint32_t known_ids[KNOWN_SENSORS] = {
         99,
         100,
 };
+
 // boolean to represent whether or not the sensor is working
 bool present[KNOWN_SENSORS] = {false, false};
 
@@ -361,7 +359,8 @@ void ds18b20_request_temperatures(const struct device *w1){
         slave_config.overdrive = 0;
         result = w1_skip_rom(w1, &slave_config);
         if(result == -ENODEV) {
-                LOG_ERR("No such devices foudn on bus");
+                LOG_ERR("No such devices found on bus");
+                // device not hooked up
                 return;
         }
         if(result < 0){
@@ -376,7 +375,7 @@ void ds18b20_request_temperatures(const struct device *w1){
                 LOG_ERR("Error writing to device: %d", result);
                 return;
         }
-        k_msleep(751); // required 750 ms for writing to take place
+        k_msleep(750); // required ~750 ms for writing to take place
 }
 
 
@@ -385,7 +384,7 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
         // variable to store the data of the temperature sensor and be manipulated
         uint8_t scratchpad[9];
 
-        // read scratchpad command
+        // read scratchpad command, found from DS18b20 datasheet
         uint8_t cmd[1] = {0xBE};
 
         // declaration of variables

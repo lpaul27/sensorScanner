@@ -1,25 +1,47 @@
-The goal of this file is to succesfully connect and communicate with a DS 18B20  Dallas Semiconductors temperature sensor.
+# Temperature Sensor Program:
+**Authors:** Lucas Paul, Valerie Hanes, Ny Ary Razafindramamba  
+**Date:** Spring 2025
 
-The temperature sensors use serial communication (UART via Universal Serial Bus [USB]).
 
-Materials for this program:
-* Dallas Semiconductors DS 18B20 Temperature sensors (100)
+**Purpose:**
+The goal of this file was to receive temperature data from sensors and send the data to be read by another program.
+
+The temperature sensors use 1-Wire communication and the microcontroller communicates with the other program via a string sent by UART (UART via USB).
+
+## Outline Goal:
+
+* Connect microcontroller to temperature sensor and ask for temperature data from all (100) sensors
+* Attain data at set intervals (2s)
+* Print readable data in 1D 100 element string format for Python script
+
+
+## Components:
+* Dallas Semiconductors DS 18B20 temperature sensors (100)
 * Nordic Semiconductors NRF52840-DK development board
+* 4.7k resistor (YVR)
+**Note:** Pull up resistor is required for 1-Wire communication. More resistance may be required for a larger system of sensors
 
-Outline Goal:
+## Configuration
 
-* Connect to Temperature sensor and receive room temperature data
-* Receive data at set intervals (2s)
-* Ramp up to many temperature sensors connected in Parallel 
-* Use UART to print readable data from python code
-* Transmit the data into a 1D element string line of all 100 data points to be collected by another program in python
+### Devicetree overlay:
+* 1-Wire serial communication
+* DS18B20: 12-bit resolution
+* UART baud rate set to 19200 Bits/s (Bd)
 
-Hardware Setup for testing one DS 18B20:
-* NOTE: All pins connected to DS 18B20 are relative to flat side towards user
+### Kernel configuration via 'prj.conf':
+* 1-wire network layer and drivers
+* 1-wire multidrop addressing
+* UART console (for transport using serial communication)
+* Logging
+* Printf with folating point support
+
+## Hardware Setup
+### External  
+**NOTE:** All pins connected to DS18B20 are relative to flat side forwards
 
 * 5V power to right pin of DS 18B20
 * GND to left pin of DS 18B20
 * P1.01 to middle pin as receive (Rx)
 * P1.02 to middle pin as transmit (Tx)
 * 4.7 k resistor (YVR) in series with Rx and Tx to VDD (3.3V)
-
+* DS18B20 sensors connected in parallel to the previous sensor
