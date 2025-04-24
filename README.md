@@ -32,7 +32,7 @@ The temperature sensors use 1-Wire communication and the microcontroller communi
 * 1-wire network layer and drivers
 * 1-wire multidrop addressing
 * UART console (for transport using serial communication)
-* Logging
+* Logging (debugging only)
 * Printf with folating point support
 
 ## Hardware Setup
