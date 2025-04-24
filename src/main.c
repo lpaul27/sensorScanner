@@ -234,7 +234,7 @@ float temp_readings[KNOWN_SENSORS];
 
 // Leave level INF if running program. Only change to DBG for debug purposes
 // program will not run correctly if left on DBG
-LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_INF);
 
 static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
 
