@@ -12,7 +12,7 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp);
 #define DS18B20_CMD_CONVERT_TEMP 0x44
 #define KNOWN_SENSORS 100
 
-
+// ID's of the temperature sensors
 uint64_t known_roms[KNOWN_SENSORS] = {
         // list of all known sensors in order
         0x280305f90c0000cc, //1 
@@ -117,6 +117,7 @@ uint64_t known_roms[KNOWN_SENSORS] = {
         0x28a719fa0c000099, //100
 };
 
+// Number of the temperature sensor wrt ID
 uint32_t known_ids[KNOWN_SENSORS] = {
         // List of the number of known sensors 
         // in accordance to the ID's above
@@ -228,6 +229,8 @@ bool present[KNOWN_SENSORS] = {false, false};
 // Array to store the temperature data
 float temp_readings[KNOWN_SENSORS];
 
+// Leave level INF if running program. Only change to DBG for debug purposes
+// program will not run correctly if left on DBG
 LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_DBG);
 
 static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
@@ -260,6 +263,7 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
 
 
  int main(void){
+        // stores temperature data
         float temp;
 
         if(!device_is_ready(w1)) {
@@ -268,6 +272,10 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
         }
 
         LOG_DBG("Searching for 1-wire sensors");
+
+        // used for identifying unknown sensor
+        // important if a sensir needs to be replaced
+        // causes error unused-variable, works fine.
         int num_sensors = w1_search_rom(w1, w1_search_callback, NULL);
 
         // infinite loop for attaining temperature data
@@ -281,7 +289,6 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                                 if(result < 0){
                                         LOG_ERR("Error reading temperature from sensor %d: %d", known_ids[i], result);
                                 }
-                                // LOG_INF("Sensor ID %d: %.2f C", known_ids[i], temp);
                         }
                         k_msleep(10);
                         printk("%.2f\t", temp);
@@ -295,7 +302,7 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
         }
 
 // comment block represents the code used to attain a temperature
-// senor's ID, not used in general Temperatur attaining
+// senor's ID, not used in general Temperature data program
 // leave commented unless attempting to reattain the ID number
 /*        int res;
 
@@ -410,7 +417,8 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
         result = w1_crc8(scratchpad, sizeof(scratchpad) - 1);
 
         // if we did not get the intended crc
-        // Compares the compacted first 7 bits into the but 8 of scratchpad, should be the same if it works
+        // Compares the compacted first 7 bits into the but 8 of scratchpad, 
+        //should be the same if it works
         if(result != scratchpad[8]){
                 LOG_ERR("CRC error: %d", result);
                 return -EIO;
