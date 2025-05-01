@@ -234,7 +234,7 @@ float temp_readings[KNOWN_SENSORS];
 
 // Leave level INF if running program. Only change to DBG for debug purposes
 // program will not run correctly if left on DBG
-LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_INF);
+LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_DBG);
 
 static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
 
@@ -289,10 +289,12 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                 
                 if(k_timer_status_get(&collection_interval) >0){
                         ds18b20_request_temperatures(w1);
+                        int sensor_num = 0;
                         for(int i = 0; i < KNOWN_SENSORS; i++){
                                 temp = -666; // Used to indicate no temp reading
                                 if(present[i]){
                                         int result = ds18b20_get_temp(w1, known_roms[i], &temp);
+                                        sensor_num++;
                                         // if there was an error attaining the temperature or talking to sensor
                                         if(result < 0){
                                                 LOG_ERR("Error reading temperature from sensor %d: %d", known_ids[i], result);
@@ -300,11 +302,13 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                                 }
                                 k_msleep(9);
                                 printk("%.2f\t", temp);
+
                         }
 
                         //print data from the for loop in one line string for the python code to read
                         printk("\n");
                         LOG_DBG("end sequence");
+                        LOG_DBG("Sensors in circuit: %d",sensor_num );
                 }
                 
         }
@@ -455,9 +459,5 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
         // if the negative case was not necessary, we simply need to shift the bits later and or with the early bits
         *temp = 0.0625 * raw_temp; // Final conversion to celsius
 
-
-
         return 0;
 }
-
-
