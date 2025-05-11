@@ -234,7 +234,7 @@ float temp_readings[KNOWN_SENSORS];
 
 // Leave level INF if running program. Only change to DBG for debug purposes
 // program will not run correctly if left on DBG
-LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(W1_Read_Multi, LOG_LEVEL_INF);
 
 static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
 
@@ -285,11 +285,14 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
         k_timer_start(&collection_interval, K_MSEC(2000), K_MSEC(2000));
 
         // infinite loop for attaining temperature data
+        
         while(true){
                 
                 if(k_timer_status_get(&collection_interval) >0){
                         ds18b20_request_temperatures(w1);
                         int sensor_num = 0;
+                        // used for debugging parasitic power mode
+                        float temporary = 0;
                         for(int i = 0; i < KNOWN_SENSORS; i++){
                                 temp = -666; // Used to indicate no temp reading
                                 if(present[i]){
@@ -300,7 +303,14 @@ static const struct device *w1 = DEVICE_DT_GET(DT_NODELABEL(w1_0));
                                                 LOG_ERR("Error reading temperature from sensor %d: %d", known_ids[i], result);
                                         }
                                 }
-                                k_msleep(9);
+                                if(!present[i]){
+                                        LOG_DBG("Error from sensor %d", i+1);
+                                }
+                                if(temp > 84 && (temporary <! temp-20 || temporary >! temp+20)){
+                                        LOG_DBG("Parasitic power mode reading from sensor %d", i+1);
+                                }
+                                temporary = temp;
+                                k_msleep(35);
                                 printk("%.2f\t", temp);
 
                         }
@@ -364,9 +374,11 @@ void w1_search_callback(struct w1_rom rom, void *user_data){
         for(int i = 0; i < KNOWN_SENSORS; i++){
                 if(rom_as_int == known_roms[i]){
                         LOG_DBG("Found sensor ID %d with ROM 0x%016llx", known_ids[i], rom_as_int);
+                        k_msleep(16);
                         present[i] = true;
                         return;
                 }
+
         }
         LOG_DBG("Found new sensor with ROM: 0x%016llx", rom_as_int);
 }
@@ -429,7 +441,7 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
         result = w1_crc8(scratchpad, sizeof(scratchpad) - 1);
 
         // if we did not get the intended crc
-        // Compares the compacted first 7 bits into the but 8 of scratchpad, 
+        // Compares the compacted first 7 bits into the bit 8 of scratchpad, 
         //should be the same if it works
         if(result != scratchpad[8]){
                 LOG_ERR("CRC error: %d", result);
