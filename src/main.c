@@ -469,7 +469,7 @@ int ds18b20_get_temp(const struct device *w1, uint64_t rom, float *temp){
         }
         raw_temp = (scratchpad[1] << 8) | scratchpad[0];
         // if the negative case was not necessary, we simply need to shift the bits later and or with the early bits
-        // Final conversion to celsius
+        // Final conversion to Celsius
         *temp = 0.0625 * raw_temp; 
 
         return 0;
